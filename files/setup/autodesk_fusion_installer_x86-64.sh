@@ -780,6 +780,8 @@ function download_files() {
     download_file "autodesk_fusion.svg" "$REPO_URL/files/setup/resource/graphics/autodesk_fusion.svg" "$SELECTED_DIRECTORY/resources/graphics"
     download_file "Autodesk Fusion.desktop" "$REPO_URL/files/setup/resource/.desktop/Autodesk%20Fusion.desktop" "$SELECTED_DIRECTORY/.desktop"
     download_file "adskidmgr-opener.desktop" "$REPO_URL/files/setup/resource/.desktop/adskidmgr-opener.desktop" "$SELECTED_DIRECTORY/.desktop"
+    download_file "swap_desktop_files.sh" "$REPO_URL/files/setup/data/swap_desktop_files.sh" "$SELECTED_DIRECTORY/bin"
+    chmod +x "$SELECTED_DIRECTORY/bin/swap_desktop_files.sh"
 
     # Download some script files for Autodesk Fusion 360!
     download_file "autodesk_fusion_launcher.sh" "$REPO_URL/files/setup/data/autodesk_fusion_launcher.sh" "$SELECTED_DIRECTORY/bin"
@@ -1104,7 +1106,9 @@ function autodesk_fusion_shortcuts_load() {
     # Create a .desktop file (launcher.sh) for Autodesk Fusion!
     DESKTOP_DIRECTORY="$HOME/.local/share/applications/wine/Programs/Autodesk"
     mkdir -p "$DESKTOP_DIRECTORY"
-    rm -f "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
+    if [ -f "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop" ]; then
+        mv "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop" "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop.bak"
+    fi
     cp "$SELECTED_DIRECTORY/.desktop/Autodesk Fusion.desktop" "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
     echo "Exec=$SELECTED_DIRECTORY/bin/autodesk_fusion_launcher.sh" >> "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
     echo "Icon=$SELECTED_DIRECTORY/resources/graphics/autodesk_fusion.svg" >> "$DESKTOP_DIRECTORY/Autodesk Fusion.desktop"
@@ -1118,7 +1122,9 @@ function autodesk_fusion_shortcuts_load() {
     determine_variable_folder_name_for_identity_manager
 
     #Create mimetype link to handle web login call backs to the Identity Manager
-    rm -f "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop"
+    if [ -f "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop" ]; then
+        mv "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop" "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop.bak"
+    fi
     cp "$SELECTED_DIRECTORY/.desktop/adskidmgr-opener.desktop" "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop"
     if [ -n "$PROTON_VERSION" ]; then
         echo "Exec=sh -c 'env STEAM_COMPAT_CLIENT_INSTALL_PATH="$STEAM_DIRECTORY" STEAM_COMPAT_DATA_PATH="$PROTONPREFIX_DIRECTORY" "$PROTON_DIRECTORY/proton" run \"\$(find $WINE_PFX -name AdskIdentityManager.exe | head -1)\" \"%u\"'" >> "$DESKTOP_DIRECTORY/adskidmgr-opener.desktop"
