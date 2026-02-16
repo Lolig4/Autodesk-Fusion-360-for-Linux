@@ -977,7 +977,7 @@ function check_and_install_wine() {
                 1)
                     echo -e "$(gettext "${GREEN}WineHQ Repository selected. The WineHQ Repository will be used for the installation.${NOCOLOR}")"
                     pkexec bash -c '
-                        dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/43/winehq.repo
+                        dnf config-manager addrepo --from-repofile=https://dl.winehq.org/wine-builds/fedora/43/winehq.repo
                         dnf remove -y wine wine-*
                         dnf install -y winehq-staging'
                     ;;
@@ -985,14 +985,14 @@ function check_and_install_wine() {
                     echo -e "$(gettext "${GREEN}openSUSE-Wine-OBS Repository selected. The openSUSE-Wine-OBS Repository will be used for the installation.${NOCOLOR}")"
                     pkexec bash -c '
                         rpm --import https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_43/repodata/repomd.xml.key
-                        dnf config-manager --add-repo https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_43/
+                        dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_43/Emulators:Wine:Fedora.repo
                         dnf remove -y wine wine-*
                         dnf install -y winehq-staging'
                     ;;
                 *)
                     echo -e "$(gettext "${RED}Invalid choice. The WineHQ Repository will be used for the installation.${NOCOLOR}")"
                     pkexec bash -c '
-                        dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/43/winehq.repo
+                        dnf config-manager addrepo --from-repofile=https://dl.winehq.org/wine-builds/fedora/43/winehq.repo
                         dnf remove -y wine wine-*
                         dnf install -y winehq-staging'
                     ;;
@@ -1000,7 +1000,7 @@ function check_and_install_wine() {
         elif [[ $DISTRO_VERSION == *"Fedora"*"Rawhide"* ]]; then
             echo "Installing Wine for Fedora rawhide ..."
             pkexec bash -c '
-                dnf config-manager --add-repo https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_Rawhide/
+                dnf config-manager addrepo --from-repofile=https://download.opensuse.org/repositories/Emulators:/Wine:/Fedora/Fedora_Rawhide/Emulators:Wine:Fedora.repo
                 dnf remove wine wine-*
                 dnf install -y winehq-staging'
         elif [[ $DISTRO_VERSION == *"Gentoo"* ]]; then
