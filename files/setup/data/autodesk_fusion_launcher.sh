@@ -104,9 +104,20 @@ function run_autodesk_fusion() {
 # You must change the first part ($HOME/.wineprefixes/fusion360) and the last part (WINEPREFIX="$HOME/.wineprefixes/fusion360") when you have installed Autodesk Fusion 360 into another directory!
 function run_autodesk_fusion_wine() {
     LAUNCHER="$(find "$WINEPREFIX_DIRECTORY" -name Fusion360.exe -printf "%T+ %p\n" | sort -r 2>&1 | head -n 1 | cut -d' ' -f2-)"
-    echo $LAUNCHER && WINEPREFIX="$WINEPREFIX_DIRECTORY" WINEDEBUG=-all WINEDEBUG=-d3d wine "$LAUNCHER"
+
+    echo $LAUNCHER
+
+    WINEPREFIX="$WINEPREFIX_DIRECTORY" \
+    WINEDEBUG=-all \
+    wine "$LAUNCHER" &
+
     # WINEDEBUG=-all = Logs everything, probably gives too much information in most cases, but may come in handy for subtle issues
     # WINEDEBUG=-d3d = Will turn off all d3d messages, and additionally disable checking for GL errors after operations. This may improve performance.
+
+    WINEPID=$!
+    wait "$WINEPID"
+
+    WINEPREFIX="$WINEPREFIX_DIRECTORY" wineserver -k
 }
 
 function run_autodesk_fusion_proton() {
@@ -121,7 +132,17 @@ function run_autodesk_fusion_proton() {
         sleep 5
     fi
 
-    echo $LAUNCHER && STEAM_COMPAT_CLIENT_INSTALL_PATH="$STEAM_DIRECTORY" STEAM_COMPAT_DATA_PATH="$AUTODESK_ROOT_DIRECTORY/protonprefix" "$PROTON_DIRECTORY/proton" run "$LAUNCHER"
+    PROTON_LOG=0 \
+    STEAM_COMPAT_CLIENT_INSTALL_PATH="$STEAM_DIRECTORY" \
+    STEAM_COMPAT_DATA_PATH="$AUTODESK_ROOT_DIRECTORY/protonprefix" \
+    "$PROTON_DIRECTORY/proton" run "$LAUNCHER" &
+
+    WINEPID=$!
+    wait $WINEPID
+
+    STEAM_COMPAT_CLIENT_INSTALL_PATH="$STEAM_DIRECTORY" \
+    STEAM_COMPAT_DATA_PATH="$AUTODESK_ROOT_DIRECTORY/protonprefix" \
+    "$PROTON_DIRECTORY/proton" wineserver -k
 }
 
 ###############################################################################################################################################################
