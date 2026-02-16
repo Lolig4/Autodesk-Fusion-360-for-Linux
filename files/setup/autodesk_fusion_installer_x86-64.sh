@@ -1366,5 +1366,5 @@ function run_wine_autodesk_fusion() {
 ##############################################################################################################################################################################
 
 check_required_packages
-download_translations
+#download_translations
 check_option "$SELECTED_OPTION"
