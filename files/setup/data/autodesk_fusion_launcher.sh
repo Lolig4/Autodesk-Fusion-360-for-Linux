@@ -127,8 +127,14 @@ function run_autodesk_fusion_proton() {
     PROTON_DIRECTORY="$STEAM_DIRECTORY/compatibilitytools.d/$PROTON_VERSION"
     
     if ! pgrep -x steam >/dev/null 2>&1; then
-        echo -e "$(gettext "${YELLOW}Starting Steam...${NOCOLOR}")"
-        steam &>/dev/null &
+        echo -e "$(gettext "${YELLOW}Starting Steam (background, no window)...${NOCOLOR}")"
+        # Start Steam in a separate user scope to avoid a parent-child link.
+        if command -v systemd-run >/dev/null 2>&1; then
+            systemd-run --user --scope --quiet steam -silent </dev/null >/dev/null 2>&1
+        else
+            # Fallback if systemd-run is not available; Steam is linked to Fusion, so it can look like Fusion never exited.
+            setsid -f steam -silent </dev/null >/dev/null 2>&1
+        fi
         sleep 5
     fi
 
@@ -140,9 +146,7 @@ function run_autodesk_fusion_proton() {
     WINEPID=$!
     wait $WINEPID
 
-    STEAM_COMPAT_CLIENT_INSTALL_PATH="$STEAM_DIRECTORY" \
-    STEAM_COMPAT_DATA_PATH="$AUTODESK_ROOT_DIRECTORY/protonprefix" \
-    "$PROTON_DIRECTORY/proton" wineserver -k
+    WINEPREFIX="$WINEPREFIX_DIRECTORY" "$PROTON_DIRECTORY/files/bin/wineserver" -k
 }
 
 ###############################################################################################################################################################

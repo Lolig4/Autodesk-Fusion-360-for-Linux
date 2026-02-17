@@ -1218,8 +1218,14 @@ function wine_autodesk_fusion_install() {
     if [ -n "$PROTON_VERSION" ]; then
         echo -e "$(gettext "${YELLOW}Init Proton...${NOCOLOR}")"
         if ! pgrep -x steam >/dev/null 2>&1; then
-            echo -e "$(gettext "${YELLOW}Starting Steam...${NOCOLOR}")"
-            steam &>/dev/null &
+            echo -e "$(gettext "${YELLOW}Starting Steam (background, no window)...${NOCOLOR}")"
+            # Start Steam in a separate user scope to avoid a parent-child link.
+            if command -v systemd-run >/dev/null 2>&1; then
+                systemd-run --user --scope --quiet steam -silent </dev/null >/dev/null 2>&1
+            else
+                # Fallback if systemd-run is not available; Steam is linked to Fusion, so it can look like Fusion never exited.
+                setsid -f steam -silent </dev/null >/dev/null 2>&1
+            fi
             sleep 5
         fi
         STEAM_COMPAT_CLIENT_INSTALL_PATH="$STEAM_DIRECTORY" STEAM_COMPAT_DATA_PATH="$PROTONPREFIX_DIRECTORY" "$PROTON_DIRECTORY/proton" run -- wineboot -u
