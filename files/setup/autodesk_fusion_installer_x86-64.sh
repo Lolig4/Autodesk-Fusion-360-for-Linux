@@ -786,6 +786,8 @@ download_files() {
     # Download some script files for Autodesk Fusion 360!
     download_file "autodesk_fusion_launcher.sh" "$REPO_URL/files/setup/data/autodesk_fusion_launcher.sh" "$SELECTED_DIRECTORY/bin"
     chmod +x "$SELECTED_DIRECTORY/bin/autodesk_fusion_launcher.sh"
+    download_file "fix-flicker.sh" "$REPO_URL/files/setup/data/fix-flicker.sh" "$SELECTED_DIRECTORY/bin"
+    chmod +x "$SELECTED_DIRECTORY/bin/fix-flicker.sh"
 }
 
 download_extensions_files() {

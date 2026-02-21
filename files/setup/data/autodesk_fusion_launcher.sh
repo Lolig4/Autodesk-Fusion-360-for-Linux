@@ -35,7 +35,7 @@ if [ "$AUTODESK_ROOT_DIRECTORY" != "$LOG_AUTODESK_ROOT_DIRECTORY" ]; then
     echo "Error: AUTODESK_ROOT_DIRECTORY does not match wineprefixes.log (line 2). Exiting..."
     exit 1
 fi
-WINEPREFIX_DIRECTORY=$(awk 'NR == 3' "$WINEPREFIX_LOG_FILE")
+WINE_PFX=$(awk 'NR == 3' "$WINEPREFIX_LOG_FILE")
 PROTON_VERSION=$(awk 'NR == 4' "$WINEPREFIX_LOG_FILE")
 
 # This feature will check if there is a new version of Autodesk Fusion 360.
@@ -51,7 +51,7 @@ function check_autodesk_fusion_online_versions() {
 
 function check_version_file() {
     # Find the newest version.txt file from the Autodesk Fusion 360 installation.
-    AUTODESK_FUSION_API_VERSION=$(find "$WINEPREFIX_DIRECTORY" -name fusion_version.txt -printf "%T+ %p\n" | sort -r 2>&1 | head -n 1 | sed -r 's/.+0000000000 (.+)/\1/')
+    AUTODESK_FUSION_API_VERSION=$(find "$WINE_PFX" -name fusion_version.txt -printf "%T+ %p\n" | sort -r 2>&1 | head -n 1 | sed -r 's/.+0000000000 (.+)/\1/')
     if [ -f "$AUTODESK_FUSION_API_VERSION" ]; then
         echo "The version.txt file exists!"
         check_versions
@@ -78,7 +78,7 @@ function backup_old_version() {
     # Backup the old version of the Autodesk Fusion 360
     echo "Backup the old version of the Autodesk Fusion 360!"
     # Copy $wineprefix to $wineprefix-backup-$SYSTEM_BUILD_VERSION
-    cp -r "$WINEPREFIX_DIRECTORY" "$WINEPREFIX_DIRECTORY-backup-$SYSTEM_BUILD_VERSION"
+    cp -r "$WINE_PFX" "$WINE_PFX-backup-$SYSTEM_BUILD_VERSION"
 }
 
 function update() {
@@ -89,8 +89,8 @@ function update() {
     curl -L "$fusion360_installer_url" -o $AUTODESK_FUSION_INSTALLER
     cp "$AUTODESK_ROOT_DIRECTORY/downloads/Fusion360ClientInstaller.exe" "$SELECTED_DIRECTORY/wineprefixes/default/drive_c/users/$USER/Downloads"
     # Install the newest version of the Autodesk Fusion 360
-    WINEPREFIX="$WINEPREFIX_DIRECTORY" timeout -k 2m 1m wine "$WINEPREFIX_DIRECTORY/drive_c/users/$USER/Downloads/Fusion360installer.exe" --quiet
-    WINEPREFIX="$WINEPREFIX_DIRECTORY" timeout -k 2m 1m wine "$WINEPREFIX_DIRECTORY/drive_c/users/$USER/Downloads/Fusion360installer.exe" --quiet
+    WINEPREFIX="$WINE_PFX" timeout -k 2m 1m wine "$WINE_PFX/drive_c/users/$USER/Downloads/Fusion360installer.exe" --quiet
+    WINEPREFIX="$WINE_PFX" timeout -k 2m 1m wine "$WINE_PFX/drive_c/users/$USER/Downloads/Fusion360installer.exe" --quiet
     run_autodesk_fusion
 }
 
@@ -103,11 +103,11 @@ function run_autodesk_fusion() {
 }
 # You must change the first part ($HOME/.wineprefixes/fusion360) and the last part (WINEPREFIX="$HOME/.wineprefixes/fusion360") when you have installed Autodesk Fusion 360 into another directory!
 function run_autodesk_fusion_wine() {
-    LAUNCHER="$(find "$WINEPREFIX_DIRECTORY" -name Fusion360.exe -printf "%T+ %p\n" | sort -r 2>&1 | head -n 1 | cut -d' ' -f2-)"
+    LAUNCHER="$(find "$WINE_PFX" -name Fusion360.exe -printf "%T+ %p\n" | sort -r 2>&1 | head -n 1 | cut -d' ' -f2-)"
 
     echo $LAUNCHER
 
-    WINEPREFIX="$WINEPREFIX_DIRECTORY" \
+    WINEPREFIX="$WINE_PFX" \
     WINEDEBUG=-all \
     wine "$LAUNCHER" &
 
@@ -117,11 +117,11 @@ function run_autodesk_fusion_wine() {
     WINEPID=$!
     wait "$WINEPID"
 
-    WINEPREFIX="$WINEPREFIX_DIRECTORY" wineserver -k
+    WINEPREFIX="$WINE_PFX" wineserver -k
 }
 
 function run_autodesk_fusion_proton() {
-    LAUNCHER="$(find "$WINEPREFIX_DIRECTORY" -name Fusion360.exe -printf "%T+ %p\n" | sort -r 2>&1 | head -n 1 | cut -d' ' -f2-)"
+    LAUNCHER="$(find "$WINE_PFX" -name Fusion360.exe -printf "%T+ %p\n" | sort -r 2>&1 | head -n 1 | cut -d' ' -f2-)"
     #LAUNCHER_WIN=$(echo "$LAUNCHER" | sed "s|$PROTONPREFIX_DIRECTORY/pfx/drive_c|C:|" | sed 's|/|\\|g')
     STEAM_DIRECTORY="$HOME/.local/share/Steam"
     PROTON_DIRECTORY="$STEAM_DIRECTORY/compatibilitytools.d/$PROTON_VERSION"
@@ -146,7 +146,7 @@ function run_autodesk_fusion_proton() {
     WINEPID=$!
     wait $WINEPID
 
-    WINEPREFIX="$WINEPREFIX_DIRECTORY" "$PROTON_DIRECTORY/files/bin/wineserver" -k
+    WINEPREFIX="$WINE_PFX" "$PROTON_DIRECTORY/files/bin/wineserver" -k
 }
 
 ###############################################################################################################################################################
